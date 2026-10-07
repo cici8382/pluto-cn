@@ -1,0 +1,14 @@
+# Runtime logs produced by the AI - never commit these
+runtime/
+runtime-*/
+logs/
+*.log
+
+# Local config the setup script writes next to your game folder
+pluto-cn-ipx.reg
+
+# Scratch
+*.tmp
+*.bak
+Thumbs.db
+desktop.ini

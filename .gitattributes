@@ -1,0 +1,11 @@
+# Line endings matter here: .cmd files MUST be CRLF or cmd.exe mis-parses them,
+# and the scripts are only ever run on Windows anyway.
+* text=auto eol=lf
+*.ps1  text eol=crlf
+*.cmd  text eol=crlf
+*.bat  text eol=crlf
+
+# Keep screenshots binary
+*.png binary
+*.jpg binary
+*.gif binary
