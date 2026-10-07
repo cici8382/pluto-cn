@@ -1,0 +1,217 @@
+{
+  "schema": 1,
+  "project": "pluto-cn",
+  "purpose": "在 Windows 上部署 Pluto（星际争霸 AI），供用户与其对战 / 演示 / 教学",
+  "agent_entrypoint": "AGENTS.md",
+  "human_entrypoint": "README.md",
+
+  "platform": {
+    "os": "Windows 10 / 11, 64-bit",
+    "required_cpu_features": ["AVX2"],
+    "recommended_cpu_features": ["AVX-VNNI"],
+    "notes": {
+      "AVX2": "必需。缺失则推理引擎无法运行 —— 是跑不起来，不是慢。",
+      "AVX-VNNI": "有则推理速度约翻倍。Intel 12 代（2021）以后 / AMD Zen 5 支持。缺失时引擎日志出现 'AVX2 madd fallback'。",
+      "min_ram_gb": 2,
+      "recommended_cores": 6
+    }
+  },
+
+  "tracks": {
+    "classic": {
+      "id": "classic",
+      "name": "经典版（StarCraft 1.16.1）",
+      "stability": "stable",
+      "supports_same_machine_two_instances": true,
+      "requires": ["starcraft_1161", "pluto", "bwapi", "chaoslauncher", "ipxwrapper"],
+      "guide": "docs/02-1.16.1-安装与同机联机.md",
+      "check_command": ".\\scripts\\1161\\01-check-env.ps1",
+      "verify_command": ".\\scripts\\1161\\02-verify.ps1 -Pluto <pluto.dll path>",
+      "setup_same_pc_command": ".\\scripts\\1161\\03-setup-same-pc.ps1 -GameDir <game dir> -Password <password>"
+    },
+    "remastered": {
+      "id": "remastered",
+      "name": "重制版（StarCraft: Remastered）",
+      "stability": "experimental",
+      "supports_same_machine_two_instances": false,
+      "requires": ["starcraft_remastered", "pluto", "remastered_bridge"],
+      "guide": "docs/03-重制版-安装与KK平台联机.md",
+      "check_command": ".\\scripts\\scr\\01-check-env.ps1",
+      "verify_command": ".\\scripts\\scr\\02-verify.ps1 -Pluto <pluto.dll path> -Bridge <bridge dir>",
+      "launch_command": ".\\scripts\\scr\\launch-kk.cmd",
+      "inject_command": ".\\scripts\\scr\\03-inject-kk.ps1 -Pluto <...> -Bridge <...> -Watch"
+    }
+  },
+
+  "components": [
+    {
+      "id": "starcraft_1161",
+      "name": "星际争霸：母巢之战 1.16.1",
+      "kind": "game",
+      "license": "Blizzard proprietary",
+      "redistributable": false,
+      "supplied_by": "user",
+      "note": "版本必须 1.16.x。本仓库不提供，也不协助获取。"
+    },
+    {
+      "id": "starcraft_remastered",
+      "name": "星际争霸：重制版",
+      "kind": "game",
+      "license": "Blizzard proprietary",
+      "redistributable": false,
+      "supplied_by": "user",
+      "required_version": "1.23.10.13515",
+      "required_arch": "x86",
+      "files": [
+        {
+          "path": "x86\\StarCraft.exe",
+          "sha256": "32dbbdd001dd381cb1b3a719b7ad1fc918a9d4bc99661c675e00254efecca827"
+        }
+      ],
+      "note": "x64 客户端（x86_64\\starcraft.exe）不被桥接支持。"
+    },
+    {
+      "id": "pluto",
+      "name": "Pluto AI",
+      "kind": "ai_model",
+      "license": "none",
+      "redistributable": false,
+      "supplied_by": "user",
+      "homepage": "https://github.com/tscmoo/pluto",
+      "download": "https://github.com/tscmoo/pluto/releases",
+      "required_release": "md07x02_cog2026_2578600_int8mv",
+      "files": [
+        {
+          "path": "pluto.dll",
+          "sha256": "7e360b643c8c0156c03fe0cad9972a3058138ccfe22f921c5b4e0cd0aaf0abef"
+        },
+        {
+          "path": "pluto\\pluto_infer.exe",
+          "sha256": "ad880d8be52a6ef03893fa20644b6627e04fcd55e030178c6d52486b82340f2b"
+        },
+        {
+          "path": "pluto\\pluto_weights.bin",
+          "sha256": "00b400eace6e4782202ebdcb3c30db76054aaa6a08c6a7dcb59575abc2d0a26e"
+        }
+      ],
+      "note": "无许可证声明，等于保留所有权利 —— 不可再分发。必须使用上述确切版本，哈希不符则不可用。"
+    },
+    {
+      "id": "bwapi",
+      "name": "BWAPI 4.4.0",
+      "kind": "runtime",
+      "license": "LGPL-3.0",
+      "redistributable": true,
+      "homepage": "https://github.com/bwapi/bwapi",
+      "download": "https://github.com/bwapi/bwapi/releases",
+      "required_version": "4.4.0",
+      "target": "<game>\\bwapi-data\\BWAPI.dll"
+    },
+    {
+      "id": "chaoslauncher",
+      "name": "Chaoslauncher (MultiInstance build)",
+      "kind": "injector",
+      "license": "none",
+      "redistributable": false,
+      "supplied_by": "user",
+      "homepage": "https://www.teamliquid.net/forum/brood-war/484495-chaoslauncher",
+      "required_plugin": "BWAPI 4.4.0 Injector [RELEASE]",
+      "note": "必须用 MultiInstance 那个变体。需要管理员权限（注入要 SeDebugPrivilege）。"
+    },
+    {
+      "id": "ipxwrapper",
+      "name": "IPXWrapper",
+      "kind": "network_shim",
+      "license": "GPL-2.0",
+      "redistributable": true,
+      "homepage": "https://github.com/solemnwarning/ipxwrapper",
+      "download": "https://github.com/solemnwarning/ipxwrapper/releases",
+      "needed_for": ["classic_same_machine", "classic_lan"],
+      "target_files": ["wsock32.dll", "ipxwrapper.dll", "mswsock.dll", "dpwsockx.dll"],
+      "note": "仅在经典版的同机/局域网联机时需要。"
+    },
+    {
+      "id": "remastered_bridge",
+      "name": "Pluto for StarCraft: Remastered（社区桥接）",
+      "kind": "bridge",
+      "license": "none",
+      "redistributable": false,
+      "supplied_by": "user",
+      "original_repo": "https://github.com/chan22222/Pluto-AI-Starcraft-Remaster",
+      "original_repo_status": "removed (404)",
+      "mirror": "https://github.com/lpflhh/Pluto-AI-Starcraft-Remaster",
+      "files": [
+        {
+          "path": "bin\\pluto-scr.dll",
+          "sha256": "beba6230b098c77579a281f592b83beea5d335b2105b7c4b2bf4fad069e74773"
+        },
+        {
+          "path": "bin\\scr-loader.exe",
+          "sha256": "5461b07d1d656fbedb86245da64ce3fb3d71a3ef4a81221d6a094a5c54f68e7e"
+        }
+      ],
+      "note": "无许可证。原仓库已下架，镜像也可能随时消失。若镜像失效，让用户自行寻找并核对哈希。桥接自带的 validation/SHA256SUMS.txt 记录的是另一个构建，以本文件为准。"
+    }
+  ],
+
+  "hard_constraints": [
+    "CPU 必须支持 AVX2",
+    "重制版必须是 x86 客户端且版本为 1.23.10.13515",
+    "重制版建房时游戏方式必须是 Melee（Top vs Bottom / FFA 仅在 -Challenge 模式下允许）",
+    "重制版的 KK 平台配置 SCRRootDir 必须指向 \\x86 —— 实测它会被平台自己改回 \\x86_64，每次开 AI 前重新确认",
+    "游戏目录不可移动（HKLM 的 InstallPath 与 bwapi.ini 指向它）",
+    "所有组件必须通过 SHA256 校验，不符即停止"
+  ],
+
+  "verification": {
+    "bridge_loaded": {
+      "file": "<bridge>\\runtime-multiplayer\\bridge.log",
+      "expect": "\"stage\":\"hook_install\",\"result\":\"MH_OK\""
+    },
+    "session_accepted": {
+      "file": "<bridge>\\runtime-multiplayer\\bridge.log",
+      "expect": "\"stage\":\"session_accepted\""
+    },
+    "session_rejected": {
+      "file": "<bridge>\\runtime-multiplayer\\bridge.log",
+      "expect": "\"stage\":\"session_skipped\"",
+      "action": "读 reason 字段，对照 docs/05-排错手册.md"
+    },
+    "bridge_crashed": {
+      "file": "<bridge>\\runtime-multiplayer\\bridge.log",
+      "expect": "\"failure\":\"bridge_exception\"",
+      "action": "上游已知 bug。桥接已死，需重启游戏并重新注入；用 -Watch 可自动重注入"
+    },
+    "ai_playing": {
+      "where": "游戏内聊天框",
+      "expect": "Pluto online ... gl hf! 或韩语状态提示"
+    },
+    "classic_same_pc_lan": {
+      "file": "<game>\\ipxwrapper.log",
+      "expect": "两个不同的 Node: 行，且两边都有 bind address: .../6112",
+      "fail_looks_like": "只有 bind(.../6112) 而没有 bind address: 行，并出现 implicit bind 回退到 1024/1025"
+    }
+  },
+
+  "hand_back_to_human": [
+    "选择走哪条路线（经典版 / 重制版）",
+    "提供游戏本体（本仓库不提供，AI 也不应协助获取）",
+    "创建 Windows 账号、修改系统设置之前 —— 必须说明并取得同意",
+    "任何需要登录 / 账号 / 密码 / 令牌的操作 —— 让用户自己完成，不要索要凭据",
+    "组件 SHA256 校验失败时 —— 询问来源，不要跳过校验硬跑"
+  ],
+
+  "prohibited": [
+    "不得用于公开排位 / 天梯匹配（作弊；且平台会封号，通常连直播账号一起处理）",
+    "不得打包或再分发游戏本体、Pluto 二进制、重制版桥接",
+    "不得修改游戏目录或 Pluto 原文件"
+  ],
+
+  "references": {
+    "AGENTS.md": "给 AI 助手的执行说明（入口）",
+    "README.md": "给人看的总览",
+    "THIRD-PARTY.md": "许可证与获取途径（含已下架仓库的镜像）",
+    "docs/07-常见问题.md": "用户高频问题",
+    "docs/05-排错手册.md": "全部错误对照表"
+  }
+}
