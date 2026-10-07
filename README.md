@@ -23,6 +23,29 @@
 
 ---
 
+## 先看效果
+
+**经典版** —— Chaoslauncher 挂上 BWAPI，Pluto 接管之后：
+
+| 挂载 BWAPI 与窗口化 | 指定 Pluto 路径 | 一键脚本跑起来 |
+|---|---|---|
+| ![Chaoslauncher](assets/01-classic-chaoslauncher.png) | ![BWAPI 路径](assets/03-classic-pluto-path.png) | ![启动脚本](assets/04-classic-launcher.png) |
+
+**同机 IPX 联机成功** —— 两个实例互相看得见（这是最难的一步）：
+
+![本机 IPX 联机](assets/05-classic-ipx-lan.png)
+
+**重制版** —— KK 平台里和 AI 对战：
+
+| 专区模式进房间 | 建房必须选 Melee | AI 接管（聊天框有韩语提示） |
+|---|---|---|
+| ![KK 专区](assets/06-scr-kk-platform.png) | ![Melee 建图](assets/07-scr-melee-room.png) | ![Pluto 运行中](assets/08-scr-pluto-running.png) |
+
+> 最后一张图聊天框里那行韩语是 Pluto 的实时状态提示（"命令应用延迟 5 帧…"）——
+> 看到它就说明 AI 已经接管了战场。
+
+---
+
 ## 两条线怎么选
 
 | | **1.16.1（经典版）** | **重制版（Remastered）** |
